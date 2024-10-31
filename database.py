@@ -6,13 +6,22 @@ COSMOS_KEY = ''
 DATABASE_NAME = 'test-db'
 CONTAINE_NAME = 'events'
 
-# Inicializamos cliente de Cosmos
+# Inicializar el cliente de Cosmos DB
 client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
 
-# Crea u obtiene la bade de datos
-database = client.create_database_if_not_exists(id = DATABASE_NAME)
+# Crear o obtener la base de datos
+try:
+    database = client.create_database_if_not_exists(id=DATABASE_NAME)
+except exceptions.CosmosResourceExistsError:
+    database = client.get_database_client(DATABASE_NAME)
 
-# Crea u obtiene el container
-container = database.create_container_if_not_exists(id = CONTAINE_NAME,
-                                                   partition_key = PartitionKey(path = "/id"),
-                                                   offer_throughput = 400)
+
+# Crear o obtener el contenedor
+try:
+    container = database.create_container_if_not_exists(
+        id=CONTAINER_NAME,
+        partition_key = PartitionKey(path = "/id"),
+        offer_throughput=400
+    )
+except exceptions.CosmosResourceExistsError:
+    container = database.get_container_client(CONTAINER_NAME)
